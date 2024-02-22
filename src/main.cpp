@@ -8,17 +8,35 @@
 #define CATA_BOT true
 // Chassis constructor
 #if CATA_BOT //to be done
+
+  //chassis motors
+    // #define RIGHT_MOTOR_1_PORT 10
+    // #define RIGHT_MOTOR_2_PORT 7 //reverse
+    // #define RIGHT_MOTOR_3_PORT 8
+    // #define RIGHT_MOTOR_4_PORT 9 //reverse
+
+    // #define LEFT_MOTOR_1_PORT 1 //reverse
+    // #define LEFT_MOTOR_2_PORT 2 
+    // #define LEFT_MOTOR_3_PORT 3 //reverse
+    // #define LEFT_MOTOR_4_PORT 4
+
+  // //sensors
+    // // #define INERTIAL_PORT 19 //why do we not have imu here yet
+    
+    // #define ROTATION_PORT 5
+    
+    // #define CATA_RADAR_PORT 16
 ez::Drive chassis (
   // Left Chassis Ports (negative port will reverse it!)
   //   the first port is used as the sensor
-  {-11, 12, -13, 14}
+  {-1, 2, -3, 4}
 
   // Right Chassis Ports (negative port will reverse it!)
   //   the first port is used as the sensor
-  ,{15, -16, 17, -18}
+  ,{10, -7, 8, -9}
 
   // IMU Port
-  ,1
+  ,15
 
   // Wheel Diameter (Remember, 4" wheels without screw holes are actually 4.125!)
   ,3.25
@@ -168,15 +186,31 @@ void opcontrol() {
 
 #if CATA_BOT
   //update this
-  pros::Motor intake_motor1(1);
-  pros::Motor intake_motor2(2, true); 
-  pros::Motor_Group intake = pros::Motor_Group({intake_motor1, intake_motor2});
 
-  pros::Motor cata_motor1(3);
-  pros::Motor cata_motor2(4, true);
-  pros::Motor_Group cata = pros::Motor_Group({cata_motor1, cata_motor2});
-  pros::ADIDigitalOut frontWings('A');
-  pros::ADIDigitalOut backWings('B');
+    // //cata and intake
+    // #define INTAKE_RIGHT_PORT 20
+    // #define INTAKE_LEFT_PORT 11 //reverse
+
+    // #define CATA_RIGHT_PORT 19
+    // #define CATA_LEFT_PORT 12
+
+    // //climb - not used for cata
+    // // #define CLIMB_MOTOR_PORT 20
+
+    // //wings
+    // #define FRONT_WINGS_PORT 'G' //or H?
+    // #define BACK_WINGS_PORT 'F' // or E?
+
+  pros::Motor intake_right_motor(20);
+  pros::Motor intake_left_motor(11, true); 
+  pros::Motor_Group intake = pros::Motor_Group({intake_right_motor, intake_left_motor});
+
+  pros::Motor cata_right_motor(19);
+  pros::Motor cata_left_motor(12, true);
+  pros::Motor_Group cata = pros::Motor_Group({cata_right_motor, cata_left_motor});
+
+  pros::ADIDigitalOut frontWings('G');
+  pros::ADIDigitalOut backWings('F');
 
   bool frontWingsDeployed = false;
   bool backWingsDeployed = false;

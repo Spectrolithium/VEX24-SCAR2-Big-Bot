@@ -1,5 +1,7 @@
 //WANT TO DEFINE MOTORS IN robot.h and robot_init.cpp BUT NEED TO FIGURE OUT IF IT MESSES WITH LIBRARY
 
+//NOT BEING USED ATM
+
 //initialize robot components here
 #include "pros/adi.hpp"
 #include "pros/misc.h"
@@ -32,12 +34,12 @@ pros::Controller master = pros::Controller(pros::E_CONTROLLER_MASTER);
 pros::Motor_Group leftMotors = pros::Motor_Group({leftMotor1, leftMotor2, leftMotor3, leftMotor4});
 pros::Motor_Group rightMotors = pros::Motor_Group({rightMotor1, rightMotor2, rightMotor3, rightMotor4});
 
-pros::Motor IntakeMotor = pros::Motor(INTAKE_PORT);
+// pros::Motor IntakeMotor = pros::Motor(INTAKE_PORT);
 #if ORANGE_BOT
     pros::Motor climbMotor = pros::Motor(CLIMB_MOTOR_PORT);
 #endif
 
-pros::Imu imu = pros::Imu(INERTIAL_PORT);
+// pros::Imu imu = pros::Imu(INERTIAL_PORT);
 
 pros::ADIDigitalOut frontWings = pros::ADIDigitalOut(FRONT_WINGS_PORT);
 pros::ADIDigitalOut backWings = pros::ADIDigitalOut(BACK_WINGS_PORT);
