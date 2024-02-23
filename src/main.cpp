@@ -21,11 +21,14 @@
     // #define LEFT_MOTOR_4_PORT 4
 
   // //sensors
-    // // #define INERTIAL_PORT 19 //why do we not have imu here yet
+    // // #define INERTIAL_PORT 17
     
     // #define ROTATION_PORT 5
     
     // #define CATA_RADAR_PORT 16
+
+pros::Rotation rotation(18);
+
 ez::Drive chassis (
   // Left Chassis Ports (negative port will reverse it!)
   //   the first port is used as the sensor
@@ -36,7 +39,7 @@ ez::Drive chassis (
   ,{10, -7, 8, -9}
 
   // IMU Port
-  ,15
+  ,17
 
   // Wheel Diameter (Remember, 4" wheels without screw holes are actually 4.125!)
   ,3.25
@@ -182,7 +185,7 @@ void autonomous() {
  */
 void opcontrol() {
   // This is preference to what you like to drive on
-  chassis.drive_brake_set(MOTOR_BRAKE_COAST);
+  chassis.drive_brake_set(MOTOR_BRAKE_HOLD);
 
 #if CATA_BOT
   //update this
@@ -198,8 +201,9 @@ void opcontrol() {
     // // #define CLIMB_MOTOR_PORT 20
 
     // //wings
-    // #define FRONT_WINGS_PORT 'G' //or H?
-    // #define BACK_WINGS_PORT 'F' // or E?
+    // #define WINGS_PORT 'F'
+
+    rotation.reset();
 
   pros::Motor intake_right_motor(20);
   pros::Motor intake_left_motor(11, true); 
@@ -208,11 +212,12 @@ void opcontrol() {
   pros::Motor cata_right_motor(19);
   pros::Motor cata_left_motor(12, true);
   pros::Motor_Group cata = pros::Motor_Group({cata_right_motor, cata_left_motor});
+  cata.set_brake_modes(pros::E_MOTOR_BRAKE_HOLD);
 
-  pros::ADIDigitalOut frontWings('G');
+  // pros::ADIDigitalOut frontWings('G');
   pros::ADIDigitalOut backWings('F');
 
-  bool frontWingsDeployed = false;
+  // bool frontWingsDeployed = false;
   bool backWingsDeployed = false;
 #else
   pros::Motor climb_motor1(19);
@@ -252,19 +257,19 @@ void opcontrol() {
     // chassis.opcontrol_arcade_flipped(ez::SINGLE); // Flipped single arcade
 
     #if CATA_BOT //cata bot controls
-    if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L1)) {
-			frontWingsDeployed = !frontWingsDeployed;
-			frontWings.set_value(frontWingsDeployed);
-		}
-		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L2)) {
+    // if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L1)) {
+		// 	frontWingsDeployed = !frontWingsDeployed;
+		// 	frontWings.set_value(frontWingsDeployed);
+		// }
+		if(master.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
 			backWingsDeployed = !backWingsDeployed;
 			backWings.set_value(backWingsDeployed);
 		}
 
-    if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R1)){
+    if(master.get_digital(pros::E_CONTROLLER_DIGITAL_R1)){
       intake = 80;
     }
-    else if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R2)){
+    else if(master.get_digital(pros::E_CONTROLLER_DIGITAL_R2)){
       intake = -80;
     }
     else{
@@ -272,12 +277,24 @@ void opcontrol() {
     }
 
     //cata code goes here 
-    if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_UP)){
-      cata = 127;
+    if(master.get_digital(pros::E_CONTROLLER_DIGITAL_L1)){
+      cata = -127;
     }
     else{
-      cata = 0;
+      if ((rotation.get_angle()/100) < 40.00) {
+        cata = -100;
+      }
+      else if ((rotation.get_angle()/100) < 50.00) {
+        cata = -40;
+      }
+      else{
+        cata = -10;
+      }
     }
+    master.clear();
+    pros::delay(100);
+    master.print(0, 0, "Rot: %d", rotation.get_angle()/100);
+    pros::delay(100);
 
     #else //u bot controls
 
