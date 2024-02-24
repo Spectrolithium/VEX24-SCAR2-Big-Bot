@@ -4,8 +4,6 @@
       "name": "PROS Project",
       "includePath": [
         "${workspaceFolder}/**",
-        "c:\\Users\\azhu6\\Downloads\\EZ-Template-Example-Project-v3.0.0\\include",
-        "c:\\Users\\azhu6\\OneDrive\\Documents\\GitHub\\VEX24-SCAR2\\include",
         "c:\\Users\\Cante\\Documents\\GitHub\\forkvex\\VEX24-SCAR2-Big-Bot\\include"
       ],
       "defines": [

@@ -105,8 +105,8 @@ void initialize() {
 
   // Autonomous Selector using LLEMU
   ez::as::auton_selector.autons_add({
-    Auton("Example Drive\n\nDrive forward and come back.", drive_example),
-    Auton("Example Turn\n\nTurn 3 times.", turn_example),
+    Auton("Auton Win Point\n\nGet Auton Win Point.", drive_example),
+    Auton("Skills\n\nRun Skills.", turn_example),
     Auton("Drive and Turn\n\nDrive forward, turn, come back. ", drive_and_turn),
     Auton("Drive and Turn\n\nSlow down during drive.", wait_until_change_speed),
     Auton("Swing Example\n\nSwing in an 'S' curve", swing_example),
@@ -166,6 +166,9 @@ void autonomous() {
   chassis.drive_brake_set(MOTOR_BRAKE_HOLD); // Set motors to hold.  This helps autonomous consistency
 
   ez::as::auton_selector.selected_auton_call(); // Calls selected auton from autonomous selector
+
+
+
 }
 
 
@@ -215,10 +218,11 @@ void opcontrol() {
   cata.set_brake_modes(pros::E_MOTOR_BRAKE_HOLD);
 
   // pros::ADIDigitalOut frontWings('G');
-  pros::ADIDigitalOut backWings('F');
+  ez::Piston backWings('F');
 
   // bool frontWingsDeployed = false;
   bool backWingsDeployed = false;
+  
 #else
   pros::Motor climb_motor1(19);
   pros::Motor climb_motor2(20, true);
@@ -235,20 +239,20 @@ void opcontrol() {
     
     // PID Tuner
     // After you find values that you're happy with, you'll have to set them in auton.cpp
-    if (!pros::competition::is_connected()) { 
-      // Enable / Disable PID Tuner
-      //  When enabled: 
-      //  * use A and Y to increment / decrement the constants
-      //  * use the arrow keys to navigate the constants
-      if (master.get_digital_new_press(DIGITAL_X)) 
-        chassis.pid_tuner_toggle();
+    // if (!pros::competition::is_connected()) { 
+    //   // Enable / Disable PID Tuner
+    //   //  When enabled: 
+    //   //  * use A and Y to increment / decrement the constants
+    //   //  * use the arrow keys to navigate the constants
+    //   if (master.get_digital_new_press(DIGITAL_X)) 
+    //     chassis.pid_tuner_toggle();
         
-      // Trigger the selected autonomous routine
-      if (master.get_digital_new_press(DIGITAL_B)) 
-        autonomous();
+    //   // Trigger the selected autonomous routine
+    //   if (master.get_digital_new_press(DIGITAL_B)) 
+    //     autonomous();
 
-      chassis.pid_tuner_iterate(); // Allow PID Tuner to iterate
-    } 
+    //   chassis.pid_tuner_iterate(); // Allow PID Tuner to iterate
+    // } 
 
     // chassis.opcontrol_tank(); // Tank control
     chassis.opcontrol_arcade_standard(ez::SPLIT); // Standard split arcade
@@ -261,16 +265,16 @@ void opcontrol() {
 		// 	frontWingsDeployed = !frontWingsDeployed;
 		// 	frontWings.set_value(frontWingsDeployed);
 		// }
-		if(master.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
+		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L2)) {
 			backWingsDeployed = !backWingsDeployed;
-			backWings.set_value(backWingsDeployed);
+			backWings.set(backWingsDeployed);
 		}
 
     if(master.get_digital(pros::E_CONTROLLER_DIGITAL_R1)){
-      intake = 80;
+      intake = 127;
     }
     else if(master.get_digital(pros::E_CONTROLLER_DIGITAL_R2)){
-      intake = -80;
+      intake = -127;
     }
     else{
       intake = 0;
@@ -284,17 +288,42 @@ void opcontrol() {
       if ((rotation.get_angle()/100) < 40.00) {
         cata = -100;
       }
-      else if ((rotation.get_angle()/100) < 50.00) {
-        cata = -40;
+      else if ((rotation.get_angle()/100) < 45.00) {
+        cata = -70;
+      }
+      else if ((rotation.get_angle()/100) < 56.00) {
+        cata = -60;
       }
       else{
         cata = -10;
       }
     }
+
+    if(master.get_digital(pros::E_CONTROLLER_DIGITAL_UP)){
+      cata = 127;
+    }
+
+    // if(master.get_digital(pros::E_CONTROLLER_DIGITAL_B)){
+    //   cata = -10;
+    // }
+    // else{
+    //   cata.set_brake_modes(MOTOR_BRAKE_HOLD);
+    // }
+
+    // last_rot = rotation.get_angle()/100;
     master.clear();
-    pros::delay(100);
-    master.print(0, 0, "Rot: %d", rotation.get_angle()/100);
-    pros::delay(100);
+
+    // pros::delay(100);
+    // master.print(0, 0, "Rot: %d", rotation.get_angle()/100);
+    // pros::delay(100);
+
+    int angle = rotation.get_angle()/100;
+
+    // printf(angle + "\n");
+
+    // std::cout << angle << std::endl;
+
+    pros::screen::print(TEXT_MEDIUM, 3, "Angle: %3d", angle);
 
     #else //u bot controls
 

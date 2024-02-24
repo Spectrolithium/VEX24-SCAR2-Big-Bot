@@ -7,7 +7,7 @@
 
 // These are out of 127
 const int DRIVE_SPEED = 110;  
-const int TURN_SPEED = 90;
+const int TURN_SPEED = 70;
 const int SWING_SPEED = 90;
 
 ///
@@ -26,7 +26,6 @@ void default_constants() {
   chassis.slew_drive_constants_set(7_in, 80);
 }
 
-
 ///
 // Drive Example
 ///
@@ -36,13 +35,68 @@ void drive_example() {
   // The third parameter is a boolean (true or false) for enabling/disabling a slew at the start of drive motions
   // for slew, only enable it when the drive distance is greater then the slew distance + a few inches
 
-  chassis.pid_drive_set(24_in, DRIVE_SPEED, true);
+   ez::Piston backWings('F');
+
+  // bool frontWingsDeployed = false;
+  bool backWingsDeployed = false;
+
+  backWingsDeployed = !backWingsDeployed;
+	backWings.set(backWingsDeployed);
   chassis.pid_wait();
 
-  chassis.pid_drive_set(-12_in, DRIVE_SPEED);
+  //take triball out and wait to retract wings
+
+  chassis.pid_turn_set(45_deg, TURN_SPEED);
   chassis.pid_wait();
 
-  chassis.pid_drive_set(-12_in, DRIVE_SPEED);
+  backWingsDeployed = !backWingsDeployed;
+	backWings.set(backWingsDeployed);
+  chassis.pid_wait();
+
+  // get into position to push triball in
+
+  chassis.pid_turn_set(0_deg, TURN_SPEED);
+  chassis.pid_wait();
+
+  chassis.pid_drive_set(18_in, DRIVE_SPEED, true);
+  chassis.pid_wait();
+
+  chassis.pid_turn_set(45_deg, TURN_SPEED);
+  chassis.pid_wait();
+
+  //push triball in and come backwards
+
+  chassis.pid_drive_set(20_in, 127, true);
+  chassis.pid_wait();
+
+  chassis.pid_drive_set(-6_in, DRIVE_SPEED, true);
+  chassis.pid_wait();
+
+  //try to push triball in again
+
+  chassis.pid_drive_set(12_in, 127, true);
+  chassis.pid_wait();
+
+  chassis.pid_drive_set(-4_in, DRIVE_SPEED, true);
+  chassis.pid_wait();
+
+  //turn to face middle bar and run into it
+
+  chassis.pid_turn_set(-45_deg, TURN_SPEED);
+  chassis.pid_wait();
+
+  chassis.pid_drive_set(-70_in, DRIVE_SPEED, true);
+  chassis.pid_wait();
+
+  //rotate so intake faces bar and push into it
+
+  chassis.pid_drive_set(10_in, DRIVE_SPEED, true);
+  chassis.pid_wait();
+
+  chassis.pid_turn_set(0_deg, TURN_SPEED);
+  chassis.pid_wait();
+
+  chassis.pid_drive_set(-8_in, DRIVE_SPEED, true);
   chassis.pid_wait();
 }
 
@@ -53,14 +107,87 @@ void turn_example() {
   // The first parameter is target degrees
   // The second parameter is max speed the robot will drive at
 
-  chassis.pid_turn_set(90_deg, TURN_SPEED);
+  pros::Motor cata_right_motor(19);
+  pros::Motor cata_left_motor(12, true);
+  pros::Motor_Group cata = pros::Motor_Group({cata_right_motor, cata_left_motor});
+  cata.set_brake_modes(pros::E_MOTOR_BRAKE_HOLD);
+
+  pros::Motor intake_right_motor(20);
+  pros::Motor intake_left_motor(11, true); 
+  pros::Motor_Group intake = pros::Motor_Group({intake_right_motor, intake_left_motor});
+
+  pros::Rotation rotation(18);
+
+  int cata_speed = 0;
+  
+  //lower catapult to load position and hold
+  while((rotation.get_angle()/100) < 56.00){
+      if ((rotation.get_angle()/100) < 40.00) {
+        cata_speed = -100;
+      }
+      else if ((rotation.get_angle()/100) < 45.00) {
+        cata_speed = -70;
+      }
+      else if ((rotation.get_angle()/100) < 56.00) {
+        cata_speed = -60;
+      }
+      else{
+        cata_speed = -10;
+      }
+    cata = cata_speed;
+  }
+  cata = -10;
+
+  //turn on intake
+    intake = -127;
+
+  //back into match load bar and get triball
+  chassis.pid_drive_set(-12_in, DRIVE_SPEED, true);
   chassis.pid_wait();
 
-  chassis.pid_turn_set(45_deg, TURN_SPEED);
-  chassis.pid_wait();
+  while(true){
+    
+    //move forward to get in range
+    chassis.pid_drive_set(24_in, DRIVE_SPEED, true);
+    chassis.pid_wait();
 
-  chassis.pid_turn_set(0_deg, TURN_SPEED);
-  chassis.pid_wait();
+    //turn off intake
+    intake = 0;
+
+    //launch triball
+    while((rotation.get_angle()/100) > 5.00){
+      cata = -127;
+
+    }
+    
+    //return to load position
+    while((rotation.get_angle()/100) < 56.00){
+        if ((rotation.get_angle()/100) < 40.00) {
+          cata_speed = -100;
+        }
+        else if ((rotation.get_angle()/100) < 45.00) {
+          cata_speed = -70;
+        }
+        else if ((rotation.get_angle()/100) < 56.00) {
+          cata_speed = -60;
+        }
+        else{
+          cata_speed = -10;
+        }
+      cata = cata_speed;
+    }
+    cata = -10;
+
+    //turn on intake
+    intake = -127;
+
+    //return to match load bar
+    chassis.pid_drive_set(-24_in, DRIVE_SPEED, true);
+    chassis.pid_wait();
+    
+    //repeat the above
+  }
+  
 }
 
 ///
