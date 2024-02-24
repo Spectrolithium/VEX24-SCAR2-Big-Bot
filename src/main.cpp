@@ -105,8 +105,8 @@ void initialize() {
 
   // Autonomous Selector using LLEMU
   ez::as::auton_selector.autons_add({
-    Auton("Auton Win Point\n\nGet Auton Win Point.", drive_example),
     Auton("Skills\n\nRun Skills.", turn_example),
+    Auton("Auton Win Point\n\nGet Auton Win Point.", drive_example),
     Auton("Drive and Turn\n\nDrive forward, turn, come back. ", drive_and_turn),
     Auton("Drive and Turn\n\nSlow down during drive.", wait_until_change_speed),
     Auton("Swing Example\n\nSwing in an 'S' curve", swing_example),
@@ -259,6 +259,9 @@ void opcontrol() {
     // chassis.opcontrol_arcade_standard(ez::SINGLE); // Standard single arcade
     // chassis.opcontrol_arcade_flipped(ez::SPLIT); // Flipped split arcade
     // chassis.opcontrol_arcade_flipped(ez::SINGLE); // Flipped single arcade
+
+    chassis.opcontrol_curve_buttons_toggle(true); 
+    chassis.opcontrol_curve_default_set(2.1, 4.3); 
 
     #if CATA_BOT //cata bot controls
     // if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L1)) {

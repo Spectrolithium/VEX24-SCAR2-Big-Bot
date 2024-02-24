@@ -43,6 +43,7 @@ void drive_example() {
   backWingsDeployed = !backWingsDeployed;
 	backWings.set(backWingsDeployed);
   chassis.pid_wait();
+  pros::delay(1000);
 
   //take triball out and wait to retract wings
 
@@ -117,38 +118,42 @@ void turn_example() {
   pros::Motor_Group intake = pros::Motor_Group({intake_right_motor, intake_left_motor});
 
   pros::Rotation rotation(18);
-
-  int cata_speed = 0;
   
   //lower catapult to load position and hold
   while((rotation.get_angle()/100) < 56.00){
       if ((rotation.get_angle()/100) < 40.00) {
-        cata_speed = -100;
+        cata = -100;
       }
       else if ((rotation.get_angle()/100) < 45.00) {
-        cata_speed = -70;
+        cata = -70;
       }
       else if ((rotation.get_angle()/100) < 56.00) {
-        cata_speed = -60;
+        cata = -60;
       }
       else{
-        cata_speed = -10;
+        cata = -10;
       }
-    cata = cata_speed;
+    pros::delay(ez::util::DELAY_TIME);
   }
   cata = -10;
 
   //turn on intake
-    intake = -127;
+  intake = -127;
 
   //back into match load bar and get triball
   chassis.pid_drive_set(-12_in, DRIVE_SPEED, true);
   chassis.pid_wait();
 
   while(true){
+
+    //quick shake to try and get triball onto cata
+    chassis.pid_drive_set(-6_in, 127, true);
+    chassis.pid_wait();
+    chassis.pid_drive_set(6_in, DRIVE_SPEED, true);
+    chassis.pid_wait();
     
     //move forward to get in range
-    chassis.pid_drive_set(24_in, DRIVE_SPEED, true);
+    chassis.pid_drive_set(16_in, DRIVE_SPEED, true);
     chassis.pid_wait();
 
     //turn off intake
@@ -157,24 +162,24 @@ void turn_example() {
     //launch triball
     while((rotation.get_angle()/100) > 5.00){
       cata = -127;
-
+      pros::delay(ez::util::DELAY_TIME);
     }
     
     //return to load position
     while((rotation.get_angle()/100) < 56.00){
         if ((rotation.get_angle()/100) < 40.00) {
-          cata_speed = -100;
+          cata = -100;
         }
         else if ((rotation.get_angle()/100) < 45.00) {
-          cata_speed = -70;
+          cata = -70;
         }
         else if ((rotation.get_angle()/100) < 56.00) {
-          cata_speed = -60;
+          cata = -60;
         }
         else{
-          cata_speed = -10;
+          cata = -10;
         }
-      cata = cata_speed;
+      pros::delay(ez::util::DELAY_TIME);
     }
     cata = -10;
 
@@ -182,9 +187,10 @@ void turn_example() {
     intake = -127;
 
     //return to match load bar
-    chassis.pid_drive_set(-24_in, DRIVE_SPEED, true);
+    chassis.pid_drive_set(-16_in, DRIVE_SPEED, true);
     chassis.pid_wait();
-    
+
+    pros::delay(2);
     //repeat the above
   }
   
