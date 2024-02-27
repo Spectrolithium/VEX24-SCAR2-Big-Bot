@@ -113,11 +113,11 @@
             "-funwind-tables",
             "--std=gnu++17",
             "-o",
-            "bin/autons.cpp.o",
-            "src\\autons.cpp"
+            "bin/main.cpp.o",
+            "src\\main.cpp"
         ],
         "directory": "C:\\Users\\Cante\\Documents\\GitHub\\forkvex\\VEX24-SCAR2-Big-Bot",
-        "file": "src\\autons.cpp"
+        "file": "src\\main.cpp"
     },
     {
         "arguments": [
@@ -153,10 +153,10 @@
             "-funwind-tables",
             "--std=gnu++17",
             "-o",
-            "bin/main.cpp.o",
-            "src\\main.cpp"
+            "bin/autons.cpp.o",
+            "src\\autons.cpp"
         ],
         "directory": "C:\\Users\\Cante\\Documents\\GitHub\\forkvex\\VEX24-SCAR2-Big-Bot",
-        "file": "src\\main.cpp"
+        "file": "src\\autons.cpp"
     }
 ]

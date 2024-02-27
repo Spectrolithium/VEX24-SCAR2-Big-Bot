@@ -118,9 +118,13 @@ void turn_example() {
   pros::Motor_Group intake = pros::Motor_Group({intake_right_motor, intake_left_motor});
 
   pros::Rotation rotation(18);
+
+  rotation.reset();
+
+  bool cata_load_position = false;
   
   //lower catapult to load position and hold
-  while((rotation.get_angle()/100) < 56.00){
+  while(cata_load_position == false){
       if ((rotation.get_angle()/100) < 40.00) {
         cata = -100;
       }
@@ -132,9 +136,15 @@ void turn_example() {
       }
       else{
         cata = -10;
+        cata_load_position = true;
       }
+      // master.clear();
+      // pros::delay(100);
+      // master.print(0, 0, "in while loop for first cata");
+      // pros::delay(100);
     pros::delay(ez::util::DELAY_TIME);
   }
+  cata_load_position = false;
   cata = -10;
 
   //turn on intake
@@ -166,7 +176,7 @@ void turn_example() {
     }
     
     //return to load position
-    while((rotation.get_angle()/100) < 56.00){
+    while(cata_load_position == false){
         if ((rotation.get_angle()/100) < 40.00) {
           cata = -100;
         }
@@ -178,9 +188,15 @@ void turn_example() {
         }
         else{
           cata = -10;
+          cata_load_position = true;
         }
+      // master.clear();
+      // pros::delay(100);
+      // master.print(0, 0, "in while loop for looping cata");
+      pros::delay(100);
       pros::delay(ez::util::DELAY_TIME);
     }
+    cata_load_position = false;
     cata = -10;
 
     //turn on intake
