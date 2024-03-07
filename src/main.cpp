@@ -27,19 +27,19 @@
     
     // #define CATA_RADAR_PORT 16
 
-pros::Rotation rotation(18);
+// pros::Rotation rotation(18);
 
 ez::Drive chassis (
   // Left Chassis Ports (negative port will reverse it!)
   //   the first port is used as the sensor
-  {-1, 2, -3, 4}
+  {-17, 18, -19, 20}
 
   // Right Chassis Ports (negative port will reverse it!)
   //   the first port is used as the sensor
-  ,{10, -7, 8, -9}
+  ,{12, -13, 14, -15}
 
   // IMU Port
-  ,17
+  ,9
 
   // Wheel Diameter (Remember, 4" wheels without screw holes are actually 4.125!)
   ,3.25
@@ -105,8 +105,8 @@ void initialize() {
 
   // Autonomous Selector using LLEMU
   ez::as::auton_selector.autons_add({
-    Auton("Auton Win Point\n\nGet Auton Win Point.", drive_example),
     Auton("Skills\n\nRun Skills.", turn_example),
+    Auton("Auton Win Point\n\nGet Auton Win Point.", drive_example),
     Auton("Drive and Turn\n\nDrive forward, turn, come back. ", drive_and_turn),
     Auton("Drive and Turn\n\nSlow down during drive.", wait_until_change_speed),
     Auton("Swing Example\n\nSwing in an 'S' curve", swing_example),
@@ -206,19 +206,25 @@ void opcontrol() {
     // //wings
     // #define WINGS_PORT 'F'
 
-    rotation.reset();
+    // rotation.reset();
 
-  pros::Motor intake_right_motor(20);
-  pros::Motor intake_left_motor(11, true); 
-  pros::Motor_Group intake = pros::Motor_Group({intake_right_motor, intake_left_motor});
+  // pros::Motor intake_right_motor(20);
+  // pros::Motor intake_left_motor(11, true); 
+  // pros::Motor_Group intake = pros::Motor_Group({intake_right_motor, intake_left_motor});
 
-  pros::Motor cata_right_motor(19);
-  pros::Motor cata_left_motor(12, true);
-  pros::Motor_Group cata = pros::Motor_Group({cata_right_motor, cata_left_motor});
-  cata.set_brake_modes(pros::E_MOTOR_BRAKE_HOLD);
+  pros::Motor intake(10);
+
+  pros::Motor scoop(1);
+  int scoop_interval = -900;
+  int scoop_target_position = scoop_interval;
+
+  // pros::Motor cata_right_motor(19);
+  // pros::Motor cata_left_motor(12, true);
+  // pros::Motor_Group cata = pros::Motor_Group({cata_right_motor, cata_left_motor});
+  // cata.set_brake_modes(pros::E_MOTOR_BRAKE_HOLD);
 
   // pros::ADIDigitalOut frontWings('G');
-  ez::Piston backWings('F');
+  ez::Piston backWings('H');
 
   // bool frontWingsDeployed = false;
   bool backWingsDeployed = false;
@@ -268,6 +274,15 @@ void opcontrol() {
 		// 	frontWingsDeployed = !frontWingsDeployed;
 		// 	frontWings.set_value(frontWingsDeployed);
 		// }
+
+    if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L1)){
+      scoop.move_absolute(scoop_target_position, 127);
+      scoop_target_position = scoop_target_position + scoop_interval;
+    }
+    // else{
+    //   scoop = 0;
+    // }
+
 		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L2)) {
 			backWingsDeployed = !backWingsDeployed;
 			backWings.set(backWingsDeployed);
@@ -283,50 +298,40 @@ void opcontrol() {
       intake = 0;
     }
 
+    
+
     //cata code goes here 
-    if(master.get_digital(pros::E_CONTROLLER_DIGITAL_L1)){
-      cata = -127;
-    }
-    else{
-      if ((rotation.get_angle()/100) < 40.00) {
-        cata = -100;
-      }
-      else if ((rotation.get_angle()/100) < 45.00) {
-        cata = -70;
-      }
-      else if ((rotation.get_angle()/100) < 56.00) {
-        cata = -60;
-      }
-      else{
-        cata = -10;
-      }
-    }
-
-    if(master.get_digital(pros::E_CONTROLLER_DIGITAL_UP)){
-      cata = 127;
-    }
-
-    // if(master.get_digital(pros::E_CONTROLLER_DIGITAL_B)){
-    //   cata = -10;
+    // if(master.get_digital(pros::E_CONTROLLER_DIGITAL_L1)){
+    //   cata = -127;
     // }
     // else{
-    //   cata.set_brake_modes(MOTOR_BRAKE_HOLD);
+    //   if ((rotation.get_angle()/100) < 40.00) {
+    //     cata = -100;
+    //   }
+    //   else if ((rotation.get_angle()/100) < 45.00) {
+    //     cata = -70;
+    //   }
+    //   else if ((rotation.get_angle()/100) < 56.00) {
+    //     cata = -60;
+    //   }
+    //   else{
+    //     cata = -10;
+    //   }
     // }
 
-    // last_rot = rotation.get_angle()/100;
+    // if(master.get_digital(pros::E_CONTROLLER_DIGITAL_UP)){
+    //   cata = 127;
+    // }
+
     master.clear();
 
     // pros::delay(100);
     // master.print(0, 0, "Rot: %d", rotation.get_angle()/100);
     // pros::delay(100);
 
-    int angle = rotation.get_angle()/100;
+    // int angle = rotation.get_angle()/100;
 
-    // printf(angle + "\n");
-
-    // std::cout << angle << std::endl;
-
-    pros::screen::print(TEXT_MEDIUM, 3, "Angle: %3d", angle);
+    // pros::screen::print(TEXT_MEDIUM, 3, "Angle: %3d", angle);
 
     #else //u bot controls
 

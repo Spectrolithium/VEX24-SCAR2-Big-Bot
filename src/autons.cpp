@@ -35,7 +35,7 @@ void drive_example() {
   // The third parameter is a boolean (true or false) for enabling/disabling a slew at the start of drive motions
   // for slew, only enable it when the drive distance is greater then the slew distance + a few inches
 
-   ez::Piston backWings('F');
+   ez::Piston backWings('H');
 
   // bool frontWingsDeployed = false;
   bool backWingsDeployed = false;
@@ -103,113 +103,114 @@ void drive_example() {
 
 ///
 // Turn Example
+// this is actually our SKILLS AUTON
 ///
 void turn_example() {
   // The first parameter is target degrees
   // The second parameter is max speed the robot will drive at
 
-  pros::Motor cata_right_motor(19);
-  pros::Motor cata_left_motor(12, true);
-  pros::Motor_Group cata = pros::Motor_Group({cata_right_motor, cata_left_motor});
-  cata.set_brake_modes(pros::E_MOTOR_BRAKE_HOLD);
+  pros::Motor intake(10);
 
-  pros::Motor intake_right_motor(20);
-  pros::Motor intake_left_motor(11, true); 
-  pros::Motor_Group intake = pros::Motor_Group({intake_right_motor, intake_left_motor});
+  pros::Motor scoop(1);
+  int scoop_speed = 127;
+  int scoop_interval = -900;
+  int scoop_target_position = scoop_interval;
 
-  pros::Rotation rotation(18);
+  int scoop_delay = 1000;
+  int wings_delay = 900;
 
-  rotation.reset();
+  ez::Piston backWings('H');
 
-  bool cata_load_position = false;
+  //deploy wings
+
+  bool backWingsDeployed = false;
+
+  backWingsDeployed = !backWingsDeployed;
+	backWings.set(backWingsDeployed);
+  chassis.pid_wait();
+  pros::delay(wings_delay);
+
+  //scoop five triballs out
+
+  scoop.move_absolute(scoop_target_position, scoop_speed);
+  scoop_target_position = scoop_target_position + scoop_interval;
+  pros::delay(scoop_delay);
+
+  scoop.move_absolute(scoop_target_position, scoop_speed);
+  scoop_target_position = scoop_target_position + scoop_interval;
+  pros::delay(scoop_delay);
+
+  scoop.move_absolute(scoop_target_position, scoop_speed);
+  scoop_target_position = scoop_target_position + scoop_interval;
+  pros::delay(scoop_delay);
+
+  scoop.move_absolute(scoop_target_position, scoop_speed);
+  scoop_target_position = scoop_target_position + scoop_interval;
+  pros::delay(scoop_delay);
+
+  scoop.move_absolute(scoop_target_position, scoop_speed);
+  scoop_target_position = scoop_target_position + scoop_interval;
+  pros::delay(scoop_delay);
   
-  //lower catapult to load position and hold
-  while(cata_load_position == false){
-      if ((rotation.get_angle()/100) < 40.00) {
-        cata = -100;
-      }
-      else if ((rotation.get_angle()/100) < 45.00) {
-        cata = -70;
-      }
-      else if ((rotation.get_angle()/100) < 56.00) {
-        cata = -60;
-      }
-      else{
-        cata = -10;
-        cata_load_position = true;
-      }
-      // master.clear();
-      // pros::delay(100);
-      // master.print(0, 0, "in while loop for first cata");
-      // pros::delay(100);
-    pros::delay(ez::util::DELAY_TIME);
-  }
-  cata_load_position = false;
-  cata = -10;
+  //retract wings to prepare for push
 
-  //turn on intake
-  intake = -127;
+  backWingsDeployed = !backWingsDeployed;
+	backWings.set(backWingsDeployed);
+  chassis.pid_wait();
+  pros::delay(wings_delay);
 
-  //back into match load bar and get triball
-  chassis.pid_drive_set(-12_in, DRIVE_SPEED, true);
+  //turn and push the triballs every five scoops
+
+  chassis.pid_drive_set(-6_in, DRIVE_SPEED, true);
   chassis.pid_wait();
 
-  while(true){
+  chassis.pid_turn_set(-45_deg, TURN_SPEED);
+  chassis.pid_wait();
 
-    //quick shake to try and get triball onto cata
-    chassis.pid_drive_set(-6_in, 127, true);
-    chassis.pid_wait();
-    chassis.pid_drive_set(6_in, DRIVE_SPEED, true);
-    chassis.pid_wait();
-    
-    //move forward to get in range
-    chassis.pid_drive_set(16_in, DRIVE_SPEED, true);
-    chassis.pid_wait();
+  chassis.pid_drive_set(-96_in, DRIVE_SPEED, true);
+  chassis.pid_wait();
 
-    //turn off intake
-    intake = 0;
+  //return to starting position
 
-    //launch triball
-    while((rotation.get_angle()/100) > 5.00){
-      cata = -127;
-      pros::delay(ez::util::DELAY_TIME);
-    }
-    
-    //return to load position
-    while(cata_load_position == false){
-        if ((rotation.get_angle()/100) < 40.00) {
-          cata = -100;
-        }
-        else if ((rotation.get_angle()/100) < 45.00) {
-          cata = -70;
-        }
-        else if ((rotation.get_angle()/100) < 56.00) {
-          cata = -60;
-        }
-        else{
-          cata = -10;
-          cata_load_position = true;
-        }
-      // master.clear();
-      // pros::delay(100);
-      // master.print(0, 0, "in while loop for looping cata");
-      pros::delay(100);
-      pros::delay(ez::util::DELAY_TIME);
-    }
-    cata_load_position = false;
-    cata = -10;
+  chassis.pid_drive_set(96_in, DRIVE_SPEED, true);
+  chassis.pid_wait();
 
-    //turn on intake
-    intake = -127;
+  chassis.pid_turn_set(0_deg, TURN_SPEED); //remember that degrees is absolute, i.e. 0 deg is starting position
+  chassis.pid_wait();
 
-    //return to match load bar
-    chassis.pid_drive_set(-16_in, DRIVE_SPEED, true);
-    chassis.pid_wait();
+  chassis.pid_drive_set(6_in, DRIVE_SPEED, true);
+  chassis.pid_wait();
 
-    pros::delay(2);
-    //repeat the above
-  }
-  
+  //deploy wings for scoop
+
+  backWingsDeployed = !backWingsDeployed;
+	backWings.set(backWingsDeployed);
+  chassis.pid_wait();
+  pros::delay(wings_delay);
+
+  //scoop five triballs out
+
+  scoop.move_absolute(scoop_target_position, scoop_speed);
+  scoop_target_position = scoop_target_position + scoop_interval;
+  pros::delay(scoop_delay);
+
+  scoop.move_absolute(scoop_target_position, scoop_speed);
+  scoop_target_position = scoop_target_position + scoop_interval;
+  pros::delay(scoop_delay);
+
+  scoop.move_absolute(scoop_target_position, scoop_speed);
+  scoop_target_position = scoop_target_position + scoop_interval;
+  pros::delay(scoop_delay);
+
+  scoop.move_absolute(scoop_target_position, scoop_speed);
+  scoop_target_position = scoop_target_position + scoop_interval;
+  pros::delay(scoop_delay);
+
+  scoop.move_absolute(scoop_target_position, scoop_speed);
+  scoop_target_position = scoop_target_position + scoop_interval;
+  pros::delay(scoop_delay);
+
+
 }
 
 ///
